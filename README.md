@@ -24,4 +24,4 @@
     - `game_records`: شامل جزئیات رکوردهای ثبت شده در هر بازی
 
 ## لینک ریپازیتوری
-[[لینک گیت‌هاب خود را اینجا قرار دهید](https://github.com/Leous1807/ChickenInvader)]
+[[لینک گیت‌هاب](https://github.com/Leous1807/ChickenInvader)]
