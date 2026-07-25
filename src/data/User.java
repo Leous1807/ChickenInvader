@@ -120,32 +120,4 @@ public class User {
     public void setSelectedPlane(String selectedPlane) {
         this.selectedPlane = selectedPlane;
     }
-
-    public String toDataLine() {
-        return username + "|" + password + "|" + highScore + "|" + lastLevel + "|" +
-                musicOn + "|" + shotSoundOn + "|" + crashSoundOn + "|" + gameOverSoundOn + "|" +
-                musicVolume + "|" + selectedPlane;
-    }
-
-    public static User fromDataLine(String line) {
-        String[] parts = line.split("\\|", -1);
-        User user = new User(parts[0], parts[1]);
-        user.highScore = Integer.parseInt(parts[2]);
-        user.lastLevel = Integer.parseInt(parts[3]);
-        user.musicOn = Boolean.parseBoolean(parts[4]);
-        user.shotSoundOn = Boolean.parseBoolean(parts[5]);
-        user.crashSoundOn = Boolean.parseBoolean(parts[6]);
-        user.gameOverSoundOn = Boolean.parseBoolean(parts[7]);
-        if (parts.length > 8) {
-            try {
-                user.musicVolume = Float.parseFloat(parts[8]);
-                if (parts.length > 9) {
-                    user.selectedPlane = parts[9];
-                }
-            } catch (NumberFormatException e) {
-                user.selectedPlane = parts[8];
-            }
-        }
-        return user;
-    }
 }
