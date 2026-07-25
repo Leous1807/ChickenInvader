@@ -32,12 +32,17 @@ public class DatabaseManager {
     }
 
     private void createTables(Connection conn) throws SQLException {
+        // ذخیره تنظیمات صدا در جدول users
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
                 "username TEXT PRIMARY KEY, " +
                 "password TEXT NOT NULL, " +
                 "high_score INTEGER DEFAULT 0, " +
                 "last_level INTEGER DEFAULT 0, " +
-                "selected_plane TEXT DEFAULT 'Default'" +
+                "selected_plane TEXT DEFAULT 'Default', " +
+                "music_on INTEGER DEFAULT 1, " +
+                "shot_on INTEGER DEFAULT 1, " +
+                "crash_on INTEGER DEFAULT 1, " +
+                "game_over_on INTEGER DEFAULT 1" +
                 ");";
 
         String createGamesTable = "CREATE TABLE IF NOT EXISTS game_records (" +
@@ -46,18 +51,14 @@ public class DatabaseManager {
                 "score INTEGER DEFAULT 0, " +
                 "level_reached INTEGER DEFAULT 0, " +
                 "timestamp TEXT NOT NULL, " +
-                "sound_summary TEXT NOT NULL, " +
                 "FOREIGN KEY (username) REFERENCES users(username)" +
                 ");";
 
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createGamesTable);
-
-            try {
-                stmt.execute("ALTER TABLE users ADD COLUMN selected_plane TEXT DEFAULT 'Default'");
-            } catch (SQLException ignored) {
-            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -103,19 +104,23 @@ public class DatabaseManager {
     }
 
     public User findUser(String username) {
-        String sql = "SELECT username, password, high_score, last_level, selected_plane FROM users WHERE username = ?";
+        String sql = "SELECT username, password, high_score, last_level, selected_plane, music_on, shot_on, crash_on, game_over_on FROM users WHERE username = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User(rs.getString("username"), rs.getString("password"));
-                    user.setHighScore(rs.getInt("high_score"));
-                    user.setLastLevel(rs.getInt("last_level"));
-                    String plane = rs.getString("selected_plane");
-                    if (plane != null) {
-                        user.setSelectedPlane(plane);
-                    }
+                    User user = new User(
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getInt("high_score"),
+                            rs.getInt("last_level"),
+                            rs.getInt("music_on") == 1,
+                            rs.getInt("shot_on") == 1,
+                            rs.getInt("crash_on") == 1,
+                            rs.getInt("game_over_on") == 1,
+                            rs.getString("selected_plane")
+                    );
                     return user;
                 }
             }
@@ -126,33 +131,31 @@ public class DatabaseManager {
     }
 
     public synchronized void updateUser(User updated) {
-        String sql = "UPDATE users SET password = ?, high_score = ?, last_level = ?, selected_plane = ? WHERE username = ?";
+        String sql = "UPDATE users SET password = ?, high_score = ?, last_level = ?, selected_plane = ?, " +
+                "music_on = ?, shot_on = ?, crash_on = ?, game_over_on = ? WHERE username = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, updated.getPassword());
             pstmt.setInt(2, updated.getHighScore());
             pstmt.setInt(3, updated.getLastLevel());
             pstmt.setString(4, updated.getSelectedPlane());
-            pstmt.setString(5, updated.getUsername());
+            pstmt.setInt(5, updated.isMusicOn() ? 1 : 0);
+            pstmt.setInt(6, updated.isShotSoundOn() ? 1 : 0);
+            pstmt.setInt(7, updated.isCrashSoundOn() ? 1 : 0);
+            pstmt.setInt(8, updated.isGameOverSoundOn() ? 1 : 0);
+            pstmt.setString(9, updated.getUsername());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public synchronized void saveGameRecord(String username, int score, int levelReached,
-                                            boolean musicOn, boolean shotOn,
-                                            boolean crashOn, boolean gameOverOn) {
+    public synchronized void saveGameRecord(String username, int score, int levelReached) {
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timestamp = dateFormat.format(currentDate);
 
-        String soundSummary = "M" + (musicOn ? "1" : "0") +
-                "S" + (shotOn ? "1" : "0") +
-                "C" + (crashOn ? "1" : "0") +
-                "G" + (gameOverOn ? "1" : "0");
-
-        String insertGameSql = "INSERT INTO game_records(username, score, level_reached, timestamp, sound_summary) VALUES(?, ?, ?, ?, ?)";
+        String insertGameSql = "INSERT INTO game_records(username, score, level_reached, timestamp) VALUES(?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertGameSql)) {
@@ -160,7 +163,6 @@ public class DatabaseManager {
             pstmt.setInt(2, score);
             pstmt.setInt(3, levelReached);
             pstmt.setString(4, timestamp);
-            pstmt.setString(5, soundSummary);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -185,7 +187,7 @@ public class DatabaseManager {
 
     public synchronized List<GameRecord> loadAllRecords() {
         List<GameRecord> list = new ArrayList<>();
-        String sql = "SELECT username, score, level_reached, timestamp, sound_summary FROM game_records";
+        String sql = "SELECT username, score, level_reached, timestamp FROM game_records";
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -196,7 +198,7 @@ public class DatabaseManager {
                         rs.getInt("score"),
                         rs.getInt("level_reached"),
                         rs.getString("timestamp"),
-                        rs.getString("sound_summary")
+                        ""
                 );
                 list.add(record);
             }
@@ -208,7 +210,7 @@ public class DatabaseManager {
 
     public synchronized List<GameRecord> getHighScoreBoard() {
         List<GameRecord> list = new ArrayList<>();
-        String sql = "SELECT r.username, r.score, r.level_reached, r.timestamp, r.sound_summary " +
+        String sql = "SELECT r.username, r.score, r.level_reached, r.timestamp " +
                 "FROM game_records r " +
                 "INNER JOIN (" +
                 "   SELECT username, MAX(score) as max_score " +
@@ -227,7 +229,7 @@ public class DatabaseManager {
                         rs.getInt("score"),
                         rs.getInt("level_reached"),
                         rs.getString("timestamp"),
-                        rs.getString("sound_summary")
+                        ""
                 );
                 list.add(record);
             }

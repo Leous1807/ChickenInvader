@@ -148,4 +148,13 @@ public class GameMain extends JFrame {
             gm.setVisible(true);
         });
     }
+
+    public void applyUserSoundSettings(User u) {
+        if (u != null && sound != null) {
+            sound.setMusicOn(u.isMusicOn());
+            sound.setShotOn(u.isShotSoundOn());
+            sound.setCrashOn(u.isCrashSoundOn());
+            sound.setGameOverOn(u.isGameOverSoundOn());
+        }
+    }
 }

@@ -82,7 +82,7 @@ public class LoginPanel extends JPanel {
     private void doLogin() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
-        if (username.isEmpty() == true || password.isEmpty() == true) {
+        if (username.isEmpty() || password.isEmpty()) {
             statusLabel.setText("Please fill in both fields.");
             return;
         }
@@ -91,8 +91,11 @@ public class LoginPanel extends JPanel {
             statusLabel.setText("Invalid username or password.");
             return;
         }
+
+        gameMain.applyUserSoundSettings(u);
+
         gameMain.setCurrentUser(u);
-        if (startGameAfterLogin == true) {
+        if (startGameAfterLogin) {
             gameMain.startNewGame();
         } else {
             gameMain.showMenu();

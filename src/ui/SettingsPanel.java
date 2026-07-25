@@ -83,6 +83,7 @@ public class SettingsPanel extends JPanel {
             u.setShotSoundOn(shotBox.isSelected());
             u.setCrashSoundOn(crashBox.isSelected());
             u.setGameOverSoundOn(gameOverBox.isSelected());
+
             gameMain.getDb().updateUser(u);
         }
         statusLabel.setText("Saved!");

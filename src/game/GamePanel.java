@@ -104,10 +104,6 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void startLevel(int newLevel) {
         this.level = newLevel;
-        this.freezeActive = false;
-        this.freezeEndTime = 0;
-        plane.rapidFireActive = false;
-        plane.shieldActive = false;
 
         bullets.clear();
         eggs.clear();
@@ -657,8 +653,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (currentUser != null) {
             username = currentUser.getUsername();
         }
-        db.saveGameRecord(username, score, level, sound.isMusicOn(), sound.isShotOn(),
-                sound.isCrashOn(), sound.isGameOverOn());
+
+        db.saveGameRecord(username, score, level);
     }
 
     private void endAndReturnToMenu() {
