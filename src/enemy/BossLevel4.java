@@ -18,7 +18,7 @@ public class BossLevel4 extends Boss {
     private BufferedImage image;
 
     public BossLevel4(double startX, double startY) {
-        super(100, 1500, startX, startY);
+        super(100, 500, startX, startY);
         this.baseY = startY;
         try {
             image = ImageIO.read(new File("resources/chicken/boss1.png"));

@@ -17,7 +17,7 @@ public abstract class Enemy {
     public boolean alive = true;
     public boolean flyingIn = false;
     private double targetX, targetY;
-    private double flySpeed = 3.0;
+    private double flySpeed = 1.0;
 
     protected double speedMultiplier = 1.0;
 

@@ -1,5 +1,7 @@
 package enemy;
 
+import entity.Egg;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -20,6 +22,10 @@ public class FastEnemy extends Enemy {
                 System.out.println("Could not load FastEnemy image.");
             }
         }
+    }
+
+    public Egg shootFastEgg() {
+        return new Egg(x + width / 2.0 - 28, y + height, 0, 8.0);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package enemy;
 
+import entity.Egg;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,6 +23,12 @@ public class ZigzagEnemy extends Enemy {
                 System.out.println("Could not load ZigzagEnemy image.");
             }
         }
+    }
+
+    public Egg shootZigzagEgg() {
+        Egg egg = new Egg(x + width / 2.0 - 28, y + height, 0, 4.0);
+        egg.isZigzag = true;
+        return egg;
     }
 
     @Override

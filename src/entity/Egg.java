@@ -15,6 +15,9 @@ public class Egg {
     public boolean alive = true;
     public boolean frozen = false;
 
+    public boolean isZigzag = false;
+    private double zigPhase = Math.random() * Math.PI * 2;
+
     private static BufferedImage image;
 
     public Egg(double x, double y, double dx, double dy) {
@@ -33,11 +36,18 @@ public class Egg {
     }
 
     public void update(int panelWidth, int panelHeight) {
-        if (frozen == true) {
+        if (frozen) {
             return;
         }
+
+        if (isZigzag) {
+            zigPhase += 0.2;
+            x += Math.sin(zigPhase) * 4.0;
+        }
+
         x = x + dx;
         y = y + dy;
+
         if (x < -width || x > panelWidth + width || y < -height || y > panelHeight + height) {
             alive = false;
         }
@@ -51,7 +61,7 @@ public class Egg {
         if (image != null) {
             g.drawImage(image, (int) x, (int) y, width, height, null);
         } else {
-            g.setColor(new Color(255, 245, 210));
+            g.setColor(isZigzag ? new Color(170, 120, 255) : new Color(255, 245, 210));
             g.fillOval((int) x, (int) y, width, height);
             g.setColor(Color.ORANGE.darker());
             g.drawOval((int) x, (int) y, width, height);

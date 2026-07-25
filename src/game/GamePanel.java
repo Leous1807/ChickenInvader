@@ -456,7 +456,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
             if (!alive.isEmpty()) {
                 Enemy chosen = alive.get(rng.nextInt(alive.size()));
-                eggs.add(new Egg(chosen.x + chosen.width / 2.0, chosen.y + chosen.height, 0, 4.0));
+
+                if (chosen instanceof FastEnemy) {
+                    eggs.add(((FastEnemy) chosen).shootFastEgg());
+                } else if (chosen instanceof ZigzagEnemy) {
+                    eggs.add(((ZigzagEnemy) chosen).shootZigzagEgg());
+                } else {
+                    eggs.add(new Egg(chosen.x + chosen.width / 2.0 - 28, chosen.y + chosen.height, 0, 4.0));
+                }
             }
         }
     }
@@ -466,7 +473,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             if (en.alive && !en.flyingIn && "Shooter".equals(en.getTypeName())) {
                 if (rng.nextInt(1000) < 5) {
                     double dx = (plane.x + plane.width / 2.0 > en.x) ? 5.0 : -5.0;
-                    eggs.add(new Egg(en.x + en.width / 2.0, en.y + en.height / 2.0, dx, 0));
+                    eggs.add(new Egg(en.x + en.width / 2.0 - 28, en.y + en.height / 2.0, dx, 0));
                 }
             }
         }

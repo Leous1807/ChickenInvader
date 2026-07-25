@@ -20,7 +20,7 @@ public class BossLevel8 extends Boss {
     private BufferedImage image;
 
     public BossLevel8(double startX, double startY) {
-        super(200, 1000, startX, startY);
+        super(200, 100, startX, startY);
         this.baseY = startY;
         try {
             image = ImageIO.read(new File("resources/chicken/boss2.png"));
@@ -34,7 +34,7 @@ public class BossLevel8 extends Boss {
     public void updateMovement(int panelWidth) {
         long now = System.currentTimeMillis();
         if (now - lastDirectionChange > 2500) {
-            if (Math.random() < 0.02) {
+            if (Math.random() < 0.2) {
                 hVelocity = -hVelocity;
                 lastDirectionChange = now;
             }
