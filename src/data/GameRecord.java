@@ -5,19 +5,16 @@ public class GameRecord {
     public int score;
     public int levelReached;
     public String timestamp;
-    public String soundSettingsSummary;
 
-    public GameRecord(String username, int score, int levelReached,
-                      String timestamp, String soundSettingsSummary) {
+    public GameRecord(String username, int score, int levelReached, String timestamp) {
         this.username = username;
         this.score = score;
         this.levelReached = levelReached;
         this.timestamp = timestamp;
-        this.soundSettingsSummary = soundSettingsSummary;
     }
 
     public String toDataLine() {
-        return username + "|" + score + "|" + levelReached + "|" + timestamp + "|" + soundSettingsSummary;
+        return username + "|" + score + "|" + levelReached + "|" + timestamp;
     }
 
     public static GameRecord fromDataLine(String line) {
@@ -26,7 +23,6 @@ public class GameRecord {
         int points = Integer.parseInt(parts[1]);
         int level = Integer.parseInt(parts[2]);
         String time = parts[3];
-        String settings = parts[4];
-        return new GameRecord(user, points, level, time, settings);
+        return new GameRecord(user, points, level, time);
     }
 }

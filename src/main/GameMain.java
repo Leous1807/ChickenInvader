@@ -79,12 +79,7 @@ public class GameMain extends JFrame {
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        if (user != null) {
-            sound.setMusicOn(user.isMusicOn());
-            sound.setShotOn(user.isShotSoundOn());
-            sound.setCrashOn(user.isCrashSoundOn());
-            sound.setGameOverOn(user.isGameOverSoundOn());
-        }
+        applyUserSoundSettings(user);
     }
 
     public void logout() {
@@ -94,10 +89,13 @@ public class GameMain extends JFrame {
     public void showMenu() {
         if (currentUser != null) {
             currentUser = db.findUser(currentUser.getUsername());
+            applyUserSoundSettings(currentUser);
         }
         mainMenu.refresh();
         cardLayout.show(container, CARD_MENU);
-        sound.playMusicLoop("Chicken Invaders 2 Remastered OST - Main Theme.wav");
+        if (sound.isMusicOn()) {
+            sound.playMusicLoop("Chicken Invaders 2 Remastered OST - Main Theme.wav");
+        }
     }
 
     public void showLogin(boolean startGameAfterLogin) {
@@ -155,6 +153,11 @@ public class GameMain extends JFrame {
             sound.setShotOn(u.isShotSoundOn());
             sound.setCrashOn(u.isCrashSoundOn());
             sound.setGameOverOn(u.isGameOverSoundOn());
+            sound.setMusicVolume(u.getMusicVolume());
+
+            if (!u.isMusicOn()) {
+                sound.stopMusic();
+            }
         }
     }
 }

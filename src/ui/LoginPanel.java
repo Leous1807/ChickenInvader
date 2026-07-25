@@ -43,6 +43,9 @@ public class LoginPanel extends JPanel {
         c.gridy = c.gridy + 1;
         form.add(label("Password:"), c);
         c.gridx = 1;
+
+        passwordField.addActionListener(e -> doLogin());
+        usernameField.addActionListener(e -> doLogin());
         form.add(passwordField, c);
 
         c.gridx = 0;
@@ -91,8 +94,6 @@ public class LoginPanel extends JPanel {
             statusLabel.setText("Invalid username or password.");
             return;
         }
-
-        gameMain.applyUserSoundSettings(u);
 
         gameMain.setCurrentUser(u);
         if (startGameAfterLogin) {

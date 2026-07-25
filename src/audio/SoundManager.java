@@ -11,6 +11,8 @@ public class SoundManager {
     private boolean crashOn = true;
     private boolean gameOverOn = true;
 
+    private float musicVolume = 0.3f;
+
     private static final String BASE = "resources/sound-effects/";
 
     public void setMusicOn(boolean v) {
@@ -30,6 +32,15 @@ public class SoundManager {
 
     public void setGameOverOn(boolean v) {
         gameOverOn = v;
+    }
+
+    public void setMusicVolume(float volume) {
+        this.musicVolume = Math.max(0.0f, Math.min(1.0f, volume));
+        applyMusicVolume();
+    }
+
+    public float getMusicVolume() {
+        return musicVolume;
     }
 
     public boolean isMusicOn() {
@@ -55,7 +66,21 @@ public class SoundManager {
         }
         musicClip = loadClip(fileName);
         if (musicClip != null) {
+            applyMusicVolume();
             musicClip.loop(Clip.LOOP_CONTINUOUSLY);
+        }
+    }
+
+    private void applyMusicVolume() {
+        if (musicClip != null && musicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl gainControl = (FloatControl) musicClip.getControl(FloatControl.Type.MASTER_GAIN);
+            if (musicVolume <= 0.0f) {
+                gainControl.setValue(gainControl.getMinimum());
+            } else {
+                float dB = (float) (Math.log10(musicVolume) * 20.0);
+                dB = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), dB));
+                gainControl.setValue(dB);
+            }
         }
     }
 

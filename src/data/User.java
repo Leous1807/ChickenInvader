@@ -10,6 +10,7 @@ public class User {
     private boolean shotSoundOn = true;
     private boolean crashSoundOn = true;
     private boolean gameOverSoundOn = true;
+    private float musicVolume = 0.3f;
     private String selectedPlane = "Default";
 
     public User(String username, String password) {
@@ -18,7 +19,6 @@ public class User {
         this.highScore = 0;
         this.lastLevel = 1;
     }
-
 
     public User(String username, String password, int highScore, int lastLevel,
                 boolean musicOn, boolean shotSoundOn, boolean crashSoundOn,
@@ -34,16 +34,28 @@ public class User {
         this.selectedPlane = selectedPlane;
     }
 
+    public User(String username, String password, int highScore, int lastLevel,
+                boolean musicOn, boolean shotSoundOn, boolean crashSoundOn,
+                boolean gameOverSoundOn, float musicVolume, String selectedPlane) {
+        this.username = username;
+        this.password = password;
+        this.highScore = highScore;
+        this.lastLevel = lastLevel;
+        this.musicOn = musicOn;
+        this.shotSoundOn = shotSoundOn;
+        this.crashSoundOn = crashSoundOn;
+        this.gameOverSoundOn = gameOverSoundOn;
+        this.musicVolume = musicVolume;
+        this.selectedPlane = selectedPlane;
+    }
 
     public String getUsername() {
         return username;
     }
 
-
     public String getPassword() {
         return password;
     }
-
 
     public int getHighScore() {
         return highScore;
@@ -93,6 +105,14 @@ public class User {
         gameOverSoundOn = v;
     }
 
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public void setMusicVolume(float musicVolume) {
+        this.musicVolume = musicVolume;
+    }
+
     public String getSelectedPlane() {
         return selectedPlane;
     }
@@ -102,7 +122,9 @@ public class User {
     }
 
     public String toDataLine() {
-        return username + "|" + password + "|" + highScore + "|" + lastLevel + "|" + musicOn + "|" + shotSoundOn + "|" + crashSoundOn + "|" + gameOverSoundOn + "|" + selectedPlane;
+        return username + "|" + password + "|" + highScore + "|" + lastLevel + "|" +
+                musicOn + "|" + shotSoundOn + "|" + crashSoundOn + "|" + gameOverSoundOn + "|" +
+                musicVolume + "|" + selectedPlane;
     }
 
     public static User fromDataLine(String line) {
@@ -115,9 +137,15 @@ public class User {
         user.crashSoundOn = Boolean.parseBoolean(parts[6]);
         user.gameOverSoundOn = Boolean.parseBoolean(parts[7]);
         if (parts.length > 8) {
-            user.selectedPlane = parts[8];
+            try {
+                user.musicVolume = Float.parseFloat(parts[8]);
+                if (parts.length > 9) {
+                    user.selectedPlane = parts[9];
+                }
+            } catch (NumberFormatException e) {
+                user.selectedPlane = parts[8];
+            }
         }
         return user;
     }
 }
-

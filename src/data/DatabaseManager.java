@@ -32,7 +32,6 @@ public class DatabaseManager {
     }
 
     private void createTables(Connection conn) throws SQLException {
-        // ذخیره تنظیمات صدا در جدول users
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
                 "username TEXT PRIMARY KEY, " +
                 "password TEXT NOT NULL, " +
@@ -42,7 +41,8 @@ public class DatabaseManager {
                 "music_on INTEGER DEFAULT 1, " +
                 "shot_on INTEGER DEFAULT 1, " +
                 "crash_on INTEGER DEFAULT 1, " +
-                "game_over_on INTEGER DEFAULT 1" +
+                "game_over_on INTEGER DEFAULT 1, " +
+                "music_volume REAL DEFAULT 0.3" +
                 ");";
 
         String createGamesTable = "CREATE TABLE IF NOT EXISTS game_records (" +
@@ -57,6 +57,11 @@ public class DatabaseManager {
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createGamesTable);
+
+            try {
+                stmt.execute("ALTER TABLE users ADD COLUMN music_volume REAL DEFAULT 0.3;");
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -104,7 +109,7 @@ public class DatabaseManager {
     }
 
     public User findUser(String username) {
-        String sql = "SELECT username, password, high_score, last_level, selected_plane, music_on, shot_on, crash_on, game_over_on FROM users WHERE username = ?";
+        String sql = "SELECT username, password, high_score, last_level, selected_plane, music_on, shot_on, crash_on, game_over_on, music_volume FROM users WHERE username = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -121,6 +126,7 @@ public class DatabaseManager {
                             rs.getInt("game_over_on") == 1,
                             rs.getString("selected_plane")
                     );
+                    user.setMusicVolume(rs.getFloat("music_volume"));
                     return user;
                 }
             }
@@ -132,7 +138,7 @@ public class DatabaseManager {
 
     public synchronized void updateUser(User updated) {
         String sql = "UPDATE users SET password = ?, high_score = ?, last_level = ?, selected_plane = ?, " +
-                "music_on = ?, shot_on = ?, crash_on = ?, game_over_on = ? WHERE username = ?";
+                "music_on = ?, shot_on = ?, crash_on = ?, game_over_on = ?, music_volume = ? WHERE username = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, updated.getPassword());
@@ -143,7 +149,8 @@ public class DatabaseManager {
             pstmt.setInt(6, updated.isShotSoundOn() ? 1 : 0);
             pstmt.setInt(7, updated.isCrashSoundOn() ? 1 : 0);
             pstmt.setInt(8, updated.isGameOverSoundOn() ? 1 : 0);
-            pstmt.setString(9, updated.getUsername());
+            pstmt.setFloat(9, updated.getMusicVolume());
+            pstmt.setString(10, updated.getUsername());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -197,8 +204,7 @@ public class DatabaseManager {
                         rs.getString("username"),
                         rs.getInt("score"),
                         rs.getInt("level_reached"),
-                        rs.getString("timestamp"),
-                        ""
+                        rs.getString("timestamp")
                 );
                 list.add(record);
             }
@@ -228,8 +234,7 @@ public class DatabaseManager {
                         rs.getString("username"),
                         rs.getInt("score"),
                         rs.getInt("level_reached"),
-                        rs.getString("timestamp"),
-                        ""
+                        rs.getString("timestamp")
                 );
                 list.add(record);
             }

@@ -93,7 +93,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void loadBackground() {
         File f = new File("resources/background/background.jpg");
-        if (f.exists() == true) {
+        if (f.exists()) {
             try {
                 backgroundImg = javax.imageio.ImageIO.read(f);
             } catch (Exception e) {
@@ -165,17 +165,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
 
         int counter;
-        if (lvl == 1) {
+        if (lvl == 1 || lvl == 2) {
             counter = 2;
-        } else if (lvl == 2) {
-            counter = 2;
-        } else if (lvl == 3) {
+        } else if (lvl == 3 || lvl == 5) {
             counter = 3;
-        } else if (lvl == 5) {
-            counter = 3;
-        } else if (lvl == 6) {
-            counter = 4;
-        } else if (lvl == 7) {
+        } else if (lvl == 6 || lvl == 7) {
             counter = 4;
         } else {
             counter = 2;
@@ -183,8 +177,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         String[] typePool = typesForLevel(lvl);
 
-        for (int r = 0; r < rows; r = r + 1) {
-            for (int c = 0; c < cols; c = c + 1) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 double bx = startX + c * cellW;
                 double by = startY + r * cellH;
                 String type = typePool[rng.nextInt(typePool.length)];
@@ -217,35 +211,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private int hpFor(String type, int lvl) {
-        boolean strong = false;
-        if (lvl >= 5) {
-            strong = true;
-        }
+        boolean strong = (lvl >= 5);
 
-        if (type.equals("Normal") == true) {
-            if (strong == true) {
-                return 3;
-            } else {
-                return 2;
-            }
-        } else if (type.equals("Fast") == true) {
-            if (strong == true) {
-                return 2;
-            } else {
-                return 1;
-            }
-        } else if (type.equals("Zigzag") == true) {
-            if (strong == true) {
-                return 3;
-            } else {
-                return 2;
-            }
-        } else if (type.equals("Shooter") == true) {
-            if (strong == true) {
-                return 3;
-            } else {
-                return 2;
-            }
+        if ("Normal".equals(type) || "Zigzag".equals(type) || "Shooter".equals(type)) {
+            return strong ? 3 : 2;
+        } else if ("Fast".equals(type)) {
+            return strong ? 2 : 1;
         } else {
             return 2;
         }
@@ -253,11 +224,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private Enemy createEnemy(String type, Cell cell, int lvl) {
         int hp = hpFor(type, lvl);
-        if (type.equals("Fast") == true) {
+        if ("Fast".equals(type)) {
             return new FastEnemy(cell.row, cell.col, cell.baseX, cell.baseY, hp);
-        } else if (type.equals("Zigzag") == true) {
+        } else if ("Zigzag".equals(type)) {
             return new ZigzagEnemy(cell.row, cell.col, cell.baseX, cell.baseY, hp);
-        } else if (type.equals("Shooter") == true) {
+        } else if ("Shooter".equals(type)) {
             return new ShooterEnemy(cell.row, cell.col, cell.baseX, cell.baseY, hp);
         } else {
             return new NormalEnemy(cell.row, cell.col, cell.baseX, cell.baseY, hp);
@@ -267,25 +238,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         long now = System.currentTimeMillis();
-        if (paused == false) {
-            if (gameOver == false) {
-                if (victory == false) {
-                    handleContinuousInput(now);
-                    updateFreezeState(now);
-                    updatePlaneAndBullets(now);
+        if (!paused && !gameOver && !victory) {
+            handleContinuousInput(now);
+            updateFreezeState(now);
+            updatePlaneAndBullets(now);
 
-                    if (boss != null) {
-                        updateBoss(now);
-                    } else {
-                        updateGrid(now);
-                    }
-
-                    updateEggs();
-                    updatePowerUps();
-                    updateExplosions();
-                    checkLevelProgress();
-                }
+            if (boss != null) {
+                updateBoss(now);
+            } else {
+                updateGrid(now);
             }
+
+            updateEggs();
+            updatePowerUps();
+            updateExplosions();
+            checkLevelProgress();
         }
         repaint();
     }
@@ -293,25 +260,25 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private void handleContinuousInput(long now) {
         double dx = 0;
         double dy = 0;
-        if (held[KeyEvent.VK_LEFT] == true || held[KeyEvent.VK_A] == true) {
-            dx = dx - 1;
+        if (held[KeyEvent.VK_LEFT] || held[KeyEvent.VK_A]) {
+            dx -= 1;
         }
-        if (held[KeyEvent.VK_RIGHT] == true || held[KeyEvent.VK_D] == true) {
-            dx = dx + 1;
+        if (held[KeyEvent.VK_RIGHT] || held[KeyEvent.VK_D]) {
+            dx += 1;
         }
-        if (held[KeyEvent.VK_UP] == true || held[KeyEvent.VK_W] == true) {
-            dy = dy - 1;
+        if (held[KeyEvent.VK_UP] || held[KeyEvent.VK_W]) {
+            dy -= 1;
         }
-        if (held[KeyEvent.VK_DOWN] == true || held[KeyEvent.VK_S] == true) {
-            dy = dy + 1;
+        if (held[KeyEvent.VK_DOWN] || held[KeyEvent.VK_S]) {
+            dy += 1;
         }
 
         if (dx != 0 || dy != 0) {
             plane.move(dx, dy, WIDTH, HEIGHT);
         }
 
-        if (held[KeyEvent.VK_SPACE] == true) {
-            if (plane.canShoot(now) == true) {
+        if (held[KeyEvent.VK_SPACE]) {
+            if (plane.canShoot(now)) {
                 bullets.addAll(plane.shoot(now));
                 sound.playShot();
             }
@@ -319,12 +286,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private void updateFreezeState(long now) {
-        if (freezeActive == true) {
-            if (now >= freezeEndTime) {
-                freezeActive = false;
-                for (Egg egg : eggs) {
-                    egg.frozen = false;
-                }
+        if (freezeActive && now >= freezeEndTime) {
+            freezeActive = false;
+            for (Egg egg : eggs) {
+                egg.frozen = false;
             }
         }
     }
@@ -333,40 +298,37 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         plane.update(now);
 
         Iterator<Bullet> bit = bullets.iterator();
-        while (bit.hasNext() == true) {
+        while (bit.hasNext()) {
             Bullet b = bit.next();
             b.update();
-            if (b.alive == false) {
+            if (!b.alive) {
                 bit.remove();
                 continue;
             }
 
             if (boss != null) {
-                if (b.getBounds().intersects(boss.getBounds()) == true) {
+                if (b.getBounds().intersects(boss.getBounds())) {
                     boolean died = boss.hit((int) Math.round(b.bossDamageMultiplier));
                     bit.remove();
                     explosions.add(new Explosion(b.x, b.y));
 
-                    if (died == true) {
+                    if (died) {
                         onBossDefeated();
                         break;
                     }
-                    continue;
                 }
             } else {
                 Enemy hitEnemy = null;
                 for (Enemy en : enemies) {
-                    if (en.alive == true) {
-                        if (b.getBounds().intersects(en.getBounds()) == true) {
-                            hitEnemy = en;
-                            break;
-                        }
+                    if (en.alive && b.getBounds().intersects(en.getBounds())) {
+                        hitEnemy = en;
+                        break;
                     }
                 }
                 if (hitEnemy != null) {
                     bit.remove();
                     boolean died = hitEnemy.hit(1);
-                    if (died == true) {
+                    if (died) {
                         onEnemyDefeated(hitEnemy);
                     }
                 }
@@ -377,22 +339,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private void onEnemyDefeated(Enemy enemy) {
         explosions.add(new Explosion(enemy.x + enemy.width / 2.0, enemy.y + enemy.height / 2.0));
         sound.playCrash();
-        score = score + enemy.scoreValue;
+        score += enemy.scoreValue;
         enemies.remove(enemy);
 
         Cell cell = findCell(enemy.homeRow, enemy.homeCol);
         if (cell != null) {
             cell.occupant = null;
-            cell.counterRemaining = cell.counterRemaining - 1;
+            cell.counterRemaining--;
             if (cell.counterRemaining > 0) {
                 Enemy replacement = createEnemy(enemy.getTypeName(), cell, level);
                 boolean fromLeft = rng.nextBoolean();
-                double fromX;
-                if (fromLeft == true) {
-                    fromX = -replacement.width;
-                } else {
-                    fromX = WIDTH;
-                }
+                double fromX = fromLeft ? -replacement.width : WIDTH;
                 replacement.startFlyIn(fromX, -replacement.height, cell.baseX + gridOffsetX, cell.baseY + gridOffsetY);
                 cell.occupant = replacement;
                 enemies.add(replacement);
@@ -407,11 +364,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private void onBossDefeated() {
         explosions.add(new Explosion(boss.x + boss.width / 2.0, boss.y + boss.height / 2.0, 30, 90));
         sound.playCrash();
-        if (level == 4) {
-            score = score + 500;
-        } else {
-            score = score + 1000;
-        }
+        score += (level == 4) ? 500 : 1000;
 
         boss = null;
 
@@ -424,10 +377,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private Cell findCell(int row, int col) {
         for (Cell c : cells) {
-            if (c.row == row) {
-                if (c.col == col) {
-                    return c;
-                }
+            if (c.row == row && c.col == col) {
+                return c;
             }
         }
         return null;
@@ -440,50 +391,49 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private void updateGrid(long now) {
-        if (freezeActive == false) {
-            gridOffsetX = gridOffsetX + gridSpeed * gridDirection;
+        if (!freezeActive) {
+            gridOffsetX += gridSpeed * gridDirection;
 
             double leftMost = Double.MAX_VALUE;
             double rightMost = -Double.MAX_VALUE;
             boolean any = false;
+
             for (Cell c : cells) {
-                if (c.occupant != null) {
-                    if (c.occupant.alive == true) {
-                        if (c.occupant.flyingIn == false) {
-                            any = true;
-                            double leftVal = c.baseX + gridOffsetX;
-                            double rightVal = c.baseX + gridOffsetX + c.occupant.width;
-                            if (leftVal < leftMost) {
-                                leftMost = leftVal;
-                            }
-                            if (rightVal > rightMost) {
-                                rightMost = rightVal;
-                            }
-                        }
+                if (c.occupant != null && c.occupant.alive && !c.occupant.flyingIn) {
+                    any = true;
+                    double leftVal = c.baseX + gridOffsetX;
+                    double rightVal = c.baseX + gridOffsetX + c.occupant.width;
+                    if (leftVal < leftMost) {
+                        leftMost = leftVal;
+                    }
+                    if (rightVal > rightMost) {
+                        rightMost = rightVal;
                     }
                 }
             }
-            if (any == true) {
+
+            if (any) {
                 if (leftMost <= 0 || rightMost >= WIDTH) {
                     gridDirection = -gridDirection;
-                    gridOffsetX = gridOffsetX + gridSpeed * gridDirection * 2;
-                    gridOffsetY = gridOffsetY + gridEdgeStep;
+                    gridOffsetX += gridSpeed * gridDirection * 2;
+                    gridOffsetY += gridEdgeStep;
                 }
             }
 
             Iterator<Enemy> it = enemies.iterator();
-            while (it.hasNext() == true) {
+            while (it.hasNext()) {
                 Enemy en = it.next();
 
                 if (en.y > HEIGHT) {
                     en.homeBaseY = -en.height - gridOffsetY;
                 }
 
-                if (en.alive == false) {
+                if (!en.alive) {
                     it.remove();
                     continue;
                 }
-                if (en.flyingIn == true) {
+
+                if (en.flyingIn) {
                     en.flyingIn = false;
                     en.updateFlyIn();
                 } else {
@@ -500,13 +450,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             lastEggDropTime = now;
             List<Enemy> alive = new ArrayList<>();
             for (Enemy en : enemies) {
-                if (en.alive == true) {
-                    if (en.flyingIn == false) {
-                        alive.add(en);
-                    }
+                if (en.alive && !en.flyingIn) {
+                    alive.add(en);
                 }
             }
-            if (alive.isEmpty() == false) {
+            if (!alive.isEmpty()) {
                 Enemy chosen = alive.get(rng.nextInt(alive.size()));
                 eggs.add(new Egg(chosen.x + chosen.width / 2.0, chosen.y + chosen.height, 0, 4.0));
             }
@@ -515,26 +463,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void maybeShooterFire(long now) {
         for (Enemy en : enemies) {
-            if (en.alive == true) {
-                if (en.flyingIn == false) {
-                    if (en.getTypeName().equals("Shooter") == true) {
-                        if (rng.nextInt(1000) < 5) {
-                            double dx;
-                            if (plane.x + plane.width / 2.0 > en.x) {
-                                dx = 5.0;
-                            } else {
-                                dx = -5.0;
-                            }
-                            eggs.add(new Egg(en.x + en.width / 2.0, en.y + en.height / 2.0, dx, 0));
-                        }
-                    }
+            if (en.alive && !en.flyingIn && "Shooter".equals(en.getTypeName())) {
+                if (rng.nextInt(1000) < 5) {
+                    double dx = (plane.x + plane.width / 2.0 > en.x) ? 5.0 : -5.0;
+                    eggs.add(new Egg(en.x + en.width / 2.0, en.y + en.height / 2.0, dx, 0));
                 }
             }
         }
     }
 
     private void updateBoss(long now) {
-        if (freezeActive == true) {
+        if (freezeActive) {
             return;
         }
         boss.updateMovement(WIDTH);
@@ -547,19 +486,19 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void updateEggs() {
         Iterator<Egg> it = eggs.iterator();
-        while (it.hasNext() == true) {
+        while (it.hasNext()) {
             Egg egg = it.next();
             egg.frozen = freezeActive;
             egg.update(WIDTH, HEIGHT);
-            if (egg.alive == false) {
+            if (!egg.alive) {
                 it.remove();
                 continue;
             }
-            if (egg.getBounds().intersects(plane.getBounds()) == true) {
+            if (egg.getBounds().intersects(plane.getBounds())) {
                 it.remove();
                 explosions.add(new Explosion(plane.x + plane.width / 2.0, plane.y + plane.height / 2.0));
                 boolean lostLife = plane.takeHit();
-                if (lostLife == true) {
+                if (lostLife) {
                     sound.playCrash();
                     if (plane.lives <= 0) {
                         triggerGameOver();
@@ -571,14 +510,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void updatePowerUps() {
         Iterator<PowerUp> it = powerUps.iterator();
-        while (it.hasNext() == true) {
+        while (it.hasNext()) {
             PowerUp p = it.next();
             p.update(HEIGHT);
-            if (p.alive == false) {
+            if (!p.alive) {
                 it.remove();
                 continue;
             }
-            if (p.getBounds().intersects(plane.getBounds()) == true) {
+            if (p.getBounds().intersects(plane.getBounds())) {
                 it.remove();
                 long now = System.currentTimeMillis();
                 if (p.type == PowerUp.Type.FREEZE_BOMB) {
@@ -596,10 +535,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void updateExplosions() {
         Iterator<Explosion> it = explosions.iterator();
-        while (it.hasNext() == true) {
+        while (it.hasNext()) {
             Explosion ex = it.next();
             ex.update();
-            if (ex.alive == false) {
+            if (!ex.alive) {
                 it.remove();
             }
         }
@@ -612,20 +551,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         boolean anyRemaining = false;
         for (Cell c : cells) {
-            if (c.isSpent() == false) {
+            if (!c.isSpent()) {
                 anyRemaining = true;
                 break;
             }
         }
 
-        if (anyRemaining == false) {
-            if (enemies.isEmpty() == true) {
-                if (victory == false) {
-                    if (gameOver == false) {
-                        startLevel(level + 1);
-                    }
-                }
-            }
+        if (!anyRemaining && enemies.isEmpty() && !victory && !gameOver) {
+            startLevel(level + 1);
         }
     }
 
@@ -645,15 +578,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private void saveRecordIfNeeded() {
-        if (recordSaved == true) {
+        if (recordSaved) {
             return;
         }
         recordSaved = true;
-        String username = "Guest";
-        if (currentUser != null) {
-            username = currentUser.getUsername();
-        }
-
+        String username = (currentUser != null) ? currentUser.getUsername() : "Guest";
         db.saveGameRecord(username, score, level);
     }
 
@@ -673,10 +602,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         drawBackground(g);
 
         for (Cell c : cells) {
-            if (c.occupant != null) {
-                if (c.occupant.alive == true) {
-                    c.occupant.draw(g);
-                }
+            if (c.occupant != null && c.occupant.alive) {
+                c.occupant.draw(g);
             }
         }
         if (boss != null) {
@@ -698,16 +625,16 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         drawHud(g);
 
-        if (showSettingsOverlay == true) {
+        if (showSettingsOverlay) {
             drawSettingsOverlay(g);
         }
-        if (paused == true) {
+        if (paused) {
             drawOverlay(g, "PAUSED", "Press P to resume");
         }
-        if (gameOver == true) {
+        if (gameOver) {
             drawOverlay(g, "GAME OVER", "Press ESC to return to the menu");
         }
-        if (victory == true) {
+        if (victory) {
             drawOverlay(g, "YOU WIN!", "Press ESC to return to the menu");
         }
     }
@@ -724,29 +651,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         g.setFont(g.getFont().deriveFont(Font.PLAIN, 13f));
         g.drawString("Sound (press M to close)", bx + 10, by + 18);
 
-        String s1 = "Off";
-        if (sound.isMusicOn() == true) {
-            s1 = "On";
-        }
-        g.drawString("1) Music: " + s1, bx + 10, by + 40);
-
-        String s2 = "Off";
-        if (sound.isShotOn() == true) {
-            s2 = "On";
-        }
-        g.drawString("2) Shot SFX: " + s2, bx + 10, by + 60);
-
-        String s3 = "Off";
-        if (sound.isCrashOn() == true) {
-            s3 = "On";
-        }
-        g.drawString("3) Crash SFX: " + s3, bx + 10, by + 80);
-
-        String s4 = "Off";
-        if (sound.isGameOverOn() == true) {
-            s4 = "On";
-        }
-        g.drawString("4) Game Over SFX: " + s4, bx + 10, by + 100);
+        g.drawString("1) Music: " + (sound.isMusicOn() ? "On" : "Off"), bx + 10, by + 40);
+        g.drawString("2) Shot SFX: " + (sound.isShotOn() ? "On" : "Off"), bx + 10, by + 60);
+        g.drawString("3) Crash SFX: " + (sound.isCrashOn() ? "On" : "Off"), bx + 10, by + 80);
+        g.drawString("4) Game Over SFX: " + (sound.isGameOverOn() ? "On" : "Off"), bx + 10, by + 100);
     }
 
     private void drawBackground(Graphics2D g) {
@@ -762,10 +670,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private void drawHud(Graphics2D g) {
         g.setColor(Color.WHITE);
         g.setFont(g.getFont().deriveFont(Font.BOLD, 16f));
-        String user = "Guest";
-        if (currentUser != null) {
-            user = currentUser.getUsername();
-        }
+        String user = (currentUser != null) ? currentUser.getUsername() : "Guest";
         g.drawString("Score: " + score, 10, 22);
         g.drawString("Level: " + level, 10, 44);
         g.drawString("Lives: " + plane.lives, 10, 66);
@@ -774,27 +679,18 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         int textY = 132;
         long now = System.currentTimeMillis();
-        if (plane.rapidFireActive == true) {
-            long remaining = (plane.rapidFireEndTime - now) / 1000;
-            if (remaining < 0) {
-                remaining = 0;
-            }
+        if (plane.rapidFireActive) {
+            long remaining = Math.max(0, (plane.rapidFireEndTime - now) / 1000);
             g.drawString("Rapid Fire: " + remaining + "s", 10, textY);
-            textY = textY + 20;
+            textY += 20;
         }
-        if (plane.shieldActive == true) {
-            long remaining = (plane.shieldEndTime - now) / 1000;
-            if (remaining < 0) {
-                remaining = 0;
-            }
+        if (plane.shieldActive) {
+            long remaining = Math.max(0, (plane.shieldEndTime - now) / 1000);
             g.drawString("Shield: " + remaining + "s", 10, textY);
-            textY = textY + 20;
+            textY += 20;
         }
-        if (freezeActive == true) {
-            long remaining = (freezeEndTime - now) / 1000;
-            if (remaining < 0) {
-                remaining = 0;
-            }
+        if (freezeActive) {
+            long remaining = Math.max(0, (freezeEndTime - now) / 1000);
             g.drawString("Freeze: " + remaining + "s", 10, textY);
         }
     }
@@ -814,31 +710,19 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
-        if (code >= 0) {
-            if (code < held.length) {
-                held[code] = true;
-            }
+        if (code >= 0 && code < held.length) {
+            held[code] = true;
         }
 
         if (code == KeyEvent.VK_P) {
-            if (gameOver == false) {
-                if (victory == false) {
-                    if (paused == true) {
-                        paused = false;
-                    } else {
-                        paused = true;
-                    }
-                }
+            if (!gameOver && !victory) {
+                paused = !paused;
             }
         } else if (code == KeyEvent.VK_ESCAPE) {
             endAndReturnToMenu();
         } else if (code == KeyEvent.VK_M) {
-            if (showSettingsOverlay == true) {
-                showSettingsOverlay = false;
-            } else {
-                showSettingsOverlay = true;
-            }
-        } else if (showSettingsOverlay == true) {
+            showSettingsOverlay = !showSettingsOverlay;
+        } else if (showSettingsOverlay) {
             if (code == KeyEvent.VK_1) {
                 toggleAndPersistSound(0);
             } else if (code == KeyEvent.VK_2) {
@@ -853,29 +737,20 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void toggleAndPersistSound(int which) {
         if (which == 0) {
-            if (sound.isMusicOn() == true) {
-                sound.setMusicOn(false);
+            boolean newState = !sound.isMusicOn();
+            sound.setMusicOn(newState);
+            if (newState) {
+                sound.playMusicLoop(victory ? "Chicken Invaders 2 Remastered OST - Ending Theme.wav"
+                        : "Chicken Invaders 2 Remastered OST - Main Theme.wav");
             } else {
-                sound.setMusicOn(true);
+                sound.stopMusic();
             }
         } else if (which == 1) {
-            if (sound.isShotOn() == true) {
-                sound.setShotOn(false);
-            } else {
-                sound.setShotOn(true);
-            }
+            sound.setShotOn(!sound.isShotOn());
         } else if (which == 2) {
-            if (sound.isCrashOn() == true) {
-                sound.setCrashOn(false);
-            } else {
-                sound.setCrashOn(true);
-            }
+            sound.setCrashOn(!sound.isCrashOn());
         } else if (which == 3) {
-            if (sound.isGameOverOn() == true) {
-                sound.setGameOverOn(false);
-            } else {
-                sound.setGameOverOn(true);
-            }
+            sound.setGameOverOn(!sound.isGameOverOn());
         }
 
         if (currentUser != null) {
@@ -883,6 +758,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             currentUser.setShotSoundOn(sound.isShotOn());
             currentUser.setCrashSoundOn(sound.isCrashOn());
             currentUser.setGameOverSoundOn(sound.isGameOverOn());
+            currentUser.setMusicVolume(sound.getMusicVolume());
             db.updateUser(currentUser);
         }
     }
@@ -890,10 +766,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         int code = e.getKeyCode();
-        if (code >= 0) {
-            if (code < held.length) {
-                held[code] = false;
-            }
+        if (code >= 0 && code < held.length) {
+            held[code] = false;
         }
     }
 
